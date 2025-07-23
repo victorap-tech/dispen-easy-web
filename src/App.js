@@ -3,7 +3,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import Logo from './assets/logo-dispen-easy.svg'; // Cambia el path si tu logo está en otro lado
 import './App.css';
 
-const API_URL = 'https://web-production-d4c6.up.railway.app/productos';
+const API_URL = 'https://web-production-d4c6.up.railway.app/productos'; // Cambia por la URL de tu backend
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -29,7 +29,7 @@ function App() {
 
   const agregarProducto = async (e) => {
     e.preventDefault();
-    if (!nuevoNombre || !nuevoPrecio) return;
+    if (!nuevoNombre || !nuevoPrecio || !nuevoLinkPago) return;
     try {
       await fetch(API_URL, {
         method: 'POST',
