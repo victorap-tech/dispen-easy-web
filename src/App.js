@@ -1,142 +1,177 @@
-import React, { useEffect, useState } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
-import Logo from './assets/logo-dispen-easy.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
 
-// URL del backend (cambiá si tu backend es otro)
-const API_URL = 'https://web-production-d4c6c.up.railway.app/productos';
+// Usuario/contraseña hardcodeados para login
+const USER = "admin";
+const PASS = "1234";
 
 function App() {
+  const [logueado, setLogueado] = useState(false);
+  const [usuario, setUsuario] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [errorLogin, setErrorLogin] = useState("");
+
   const [productos, setProductos] = useState([]);
-  const [nuevoNombre, setNuevoNombre] = useState('');
-  const [nuevoPrecio, setNuevoPrecio] = useState('');
-  const [nuevoLinkPago, setNuevoLinkPago] = useState('');
-  const [qrOpen, setQROpen] = useState(false);
-  const [qrValue, setQRValue] = useState('');
-  const [qrProduct, setQRProduct] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [precio, setPrecio] = useState("");
 
-  // Trae los productos del backend
+  const backendUrl = "https://TU_BACKEND_URL_AQUI"; // Cambiá por tu backend Railway
+
+  // Handler login
+  const login = (e) => {
+    e.preventDefault();
+    if (usuario === USER && contrasena === PASS) {
+      setLogueado(true);
+      setErrorLogin("");
+      setUsuario("");
+      setContrasena("");
+    } else {
+      setErrorLogin("Usuario o contraseña incorrectos");
+    }
+  };
+
   useEffect(() => {
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
-      .catch(() => alert("No se pudo conectar al backend."));
-  }, []);
+    if (logueado) {
+      fetch(`${backendUrl}/productos`)
+        .then((res) => res.json())
+        .then(setProductos);
+    }
+  }, [logueado]);
 
-  // Agregar producto
-  const handleAgregar = () => {
-    if (!nuevoNombre || !nuevoPrecio || !nuevoLinkPago) return;
-    fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre: nuevoNombre,
-        precio: Number(nuevoPrecio),
-        link_pago: nuevoLinkPago,
-      }),
+  const handleAgregar = (e) => {
+    e.preventDefault();
+    if (!nombre || !precio) return;
+    fetch(`${backendUrl}/productos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, precio }),
     })
       .then((res) => res.json())
-      .then((nuevo) => setProductos([...productos, nuevo]))
-      .catch(() => alert("Error al agregar producto"));
-    setNuevoNombre('');
-    setNuevoPrecio('');
-    setNuevoLinkPago('');
+      .then((prods) => {
+        setProductos(prods);
+        setNombre("");
+        setPrecio("");
+      });
   };
 
-  // Borrar producto
-  const handleBorrar = (id) => {
-    fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-      .then(() => setProductos(productos.filter(p => p.id !== id)))
-      .catch(() => alert("Error al borrar producto"));
+  // Cerrar sesión
+  const logout = () => setLogueado(false);
+
+  // --- Generador e impresor de QR ---
+  const imprimirQR = (producto) => {
+    // Usamos API de QR externa rápida (puede ser cualquier otra si preferís)
+    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(producto.link_pago)}`;
+    // Arma el HTML a imprimir
+    const html = `
+      <div style="text-align:center; font-family:sans-serif;">
+        <h2>${producto.nombre}</h2>
+        <p style="font-size:22px; margin:12px 0;">Precio: $${producto.precio}</p>
+        <img src="${urlQR}" alt="QR Link Pago" /><br>
+        <small>${producto.link_pago}</small>
+      </div>
+      <script>window.onload = function() { window.print(); }</script>
+    `;
+    const w = window.open("", "_blank", "width=400,height=600");
+    w.document.write(html);
+    w.document.close();
   };
 
-  // Imprimir solo el QR
-  const handlePrint = () => {
-    const printContents = document.getElementById('qr-to-print').innerHTML;
-    const originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload(); // Refresca por si acaso
-  };
+  // --- LOGIN FORM ---
+  if (!logueado) {
+    return (
+      <div style={{ maxWidth: 350, margin: "80px auto", fontFamily: "sans-serif" }}>
+        <h2>Login Administrador</h2>
+        <form onSubmit={login}>
+          <input
+            type="text"
+            placeholder="Usuario"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+            style={{ display: "block", marginBottom: 12, padding: 6, width: "100%" }}
+          />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
+            style={{ display: "block", marginBottom: 12, padding: 6, width: "100%" }}
+          />
+          <button type="submit" style={{ padding: 8, width: "100%" }}>Ingresar</button>
+        </form>
+        {errorLogin && <p style={{ color: "red" }}>{errorLogin}</p>}
+      </div>
+    );
+  }
 
+  // --- PANEL ADMIN ---
   return (
-    <div className="app-bg">
-      <div className="centered-container">
-        <img src={Logo} alt="Logo Dispen-Easy" className="logo-img" />
-        <h1 className="main-title">Dispen-Easy Web</h1>
-        <h2 className="subtitle">Productos conectados al backend</h2>
-        <div className="inputs-row">
-          <input
-            type="text"
-            placeholder="Nuevo producto"
-            value={nuevoNombre}
-            onChange={e => setNuevoNombre(e.target.value)}
-          />
-          <input
-            type="number"
-            placeholder="Precio"
-            value={nuevoPrecio}
-            onChange={e => setNuevoPrecio(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Link de pago"
-            value={nuevoLinkPago}
-            onChange={e => setNuevoLinkPago(e.target.value)}
-          />
-          <button className="add-btn" onClick={handleAgregar}>Agregar</button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Precio ($)</th>
-              <th>Ver QR</th>
-              <th>Borrar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map(producto => (
-              <tr key={producto.id}>
-                <td>{producto.nombre}</td>
-                <td>{producto.precio}</td>
-                <td>
-                  <button
-                    className="qr-btn"
-                    onClick={() => {
-                      setQRValue(producto.link_pago);
-                      setQRProduct(producto.nombre);
-                      setQROpen(true);
-                    }}
-                  >
-                    Ver QR
-                  </button>
-                </td>
-                <td>
-                  <button className="delete-btn" onClick={() => handleBorrar(producto.id)}>Borrar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div style={{ maxWidth: 600, margin: "40px auto", fontFamily: "sans-serif" }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h2>Dispen-Easy – Administración</h2>
+        <button onClick={logout} style={{ height: 36, alignSelf: "center" }}>Cerrar sesión</button>
       </div>
 
-      {/* Modal QR */}
-      {qrOpen && (
-        <div className="modal-bg">
-          <div className="modal">
-            <div id="qr-to-print" className="qr-print-container">
-              <QRCodeCanvas value={qrValue} size={256} />
-              <div className="qr-link">{qrValue}</div>
-              <div className="qr-product">{qrProduct}</div>
-              <div className="qr-text">Escaneá y pagá aquí</div>
-            </div>
-            <button className="imprimir" onClick={handlePrint}>Imprimir</button>
-            <button className="cerrar" onClick={() => setQROpen(false)}>Cerrar</button>
-          </div>
-        </div>
-      )}
+      <form onSubmit={handleAgregar} style={{ marginBottom: 30 }}>
+        <input
+          type="text"
+          placeholder="Nombre del producto"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          style={{ marginRight: 10, padding: 6, width: 180 }}
+        />
+        <input
+          type="number"
+          placeholder="Precio"
+          value={precio}
+          onChange={(e) => setPrecio(e.target.value)}
+          style={{ marginRight: 10, padding: 6, width: 100 }}
+        />
+        <button type="submit" style={{ padding: 6 }}>Agregar</button>
+      </form>
+
+      <table width="100%" border="1" cellSpacing="0" style={{ textAlign: "center" }}>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Link de pago</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {productos.map((p) => (
+            <tr key={p.id}>
+              <td>{p.nombre}</td>
+              <td>${p.precio}</td>
+              <td>
+                {p.link_pago
+                  ? (
+                    <a href={p.link_pago} target="_blank" rel="noopener noreferrer">
+                      Ir al link
+                    </a>
+                  )
+                  : "—"}
+              </td>
+              <td>
+                {p.link_pago && (
+                  <>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(p.link_pago)}
+                      style={{ marginRight: 6 }}
+                    >
+                      Copiar link
+                    </button>
+                    <button
+                      onClick={() => imprimirQR(p)}
+                    >
+                      Imprimir QR
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
