@@ -14,7 +14,7 @@ function App() {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
 
-  const backendUrl = "https://TU_BACKEND_URL_AQUI"; // Cambiá por tu backend Railway
+  const backendUrl = "https://web-production-d4c6.up.railway.app/"; // Cambiá por tu backend Railway
 
   // Handler login
   const login = (e) => {
