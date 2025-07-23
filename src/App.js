@@ -3,8 +3,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import Logo from './assets/logo-dispen-easy.svg';
 import './App.css';
 
-// Cambia la URL según tu backend
-const API_URL = 'https://web-production-d4c6c.up.railway.app/productos';
+const API_URL = 'https://web-production-d4c6.up.railway.app/productos';
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -15,54 +14,63 @@ function App() {
   const [qrValue, setQRValue] = useState('');
   const [qrProduct, setQRProduct] = useState('');
 
-  // Traer productos al cargar
   useEffect(() => {
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setProductos(data))
-      .catch(() => alert('No se pudo conectar al backend.'));
+    fetchProductos();
   }, []);
 
-  // Agregar producto nuevo
-  const handleAgregar = () => {
+  const fetchProductos = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setProductos(data);
+    } catch (error) {
+      alert('No se pudo conectar al backend.');
+    }
+  };
+
+  const handleAgregar = async () => {
     if (!nuevoNombre || !nuevoPrecio || !nuevoLinkPago) {
-      alert('Por favor completá todos los campos');
+      alert('Completa todos los campos');
       return;
     }
-    fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        nombre: nuevoNombre,
-        precio: nuevoPrecio,
-        link_pago: nuevoLinkPago
-      })
-    })
-      .then(() => {
+    const nuevo = {
+      nombre: nuevoNombre,
+      precio: parseFloat(nuevoPrecio),
+      link_pago: nuevoLinkPago,
+    };
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevo),
+      });
+      if (response.ok) {
         setNuevoNombre('');
         setNuevoPrecio('');
         setNuevoLinkPago('');
-        // Recarga productos para ver el nuevo
-        fetch(API_URL)
-          .then(res => res.json())
-          .then(data => setProductos(data));
-      });
+        fetchProductos();
+      }
+    } catch (error) {
+      alert('Error agregando producto');
+    }
   };
 
-  // Borrar producto
-  const handleBorrar = (id) => {
-    fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-      .then(() => setProductos(productos.filter(p => p.id !== id)));
+  const handleBorrar = async (id) => {
+    if (!window.confirm('¿Seguro que deseas borrar este producto?')) return;
+    try {
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      fetchProductos();
+    } catch (error) {
+      alert('Error borrando producto');
+    }
   };
 
-  // Abrir modal QR
   const handleVerQR = (link, nombre) => {
     setQRValue(link);
     setQRProduct(nombre);
     setQROpen(true);
   };
 
-  // Imprimir solo QR con texto
   const handlePrintQR = () => {
     const qrElement = document.getElementById('qr-to-print');
     const win = window.open('', 'Print QR', 'height=400,width=350');
@@ -71,25 +79,12 @@ function App() {
         <head>
           <title>Imprimir QR</title>
           <style>
-            body { 
-              display: flex; 
-              flex-direction: column; 
-              align-items: center; 
-              justify-content: center; 
-              height: 100vh; 
-              margin: 0; 
-              font-family: Arial, sans-serif;
-            }
-            .qr-label {
-              margin-top: 16px;
-              font-size: 18px;
-              font-weight: bold;
-            }
+            body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: Arial, sans-serif;}
+            .qr-label { margin-top: 16px; font-size: 18px; font-weight: bold;}
           </style>
         </head>
         <body>
           ${qrElement.outerHTML}
-          <div class="qr-label">Escaneá y pagá aquí</div>
         </body>
       </html>
     `);
@@ -103,28 +98,45 @@ function App() {
 
   return (
     <div className="App">
-      <div className="card">
-        <img src={Logo} alt="logo" style={{width: 70, margin: "16px auto"}} />
-        <h2>Dispen-Easy Web</h2>
-        <p style={{marginBottom: 24}}>Productos conectados al backend</p>
-        <div style={{display:"flex", gap:8, marginBottom:18}}>
+      {/* Modal QR */}
+      {qrOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <div id="qr-to-print" style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
+              <QRCodeCanvas value={qrValue} size={220} />
+              <div style={{marginTop:12, fontWeight:"bold", fontSize:18}}>{qrProduct}</div>
+              <div style={{marginTop:6, fontSize:16}}>Escaneá y pagá aquí</div>
+            </div>
+            <div style={{display:"flex", gap:"10px", justifyContent:"center", margin:"14px 0 0 0"}}>
+              <button className="btn" onClick={handlePrintQR}>Imprimir</button>
+              <button className="btn-delete" onClick={() => setQROpen(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="main-card">
+        <img src={Logo} alt="Logo" className="main-logo" />
+        <h1>Dispen-Easy Web</h1>
+        <h2>Productos conectados al backend</h2>
+        <div className="input-row">
           <input
             type="text"
             placeholder="Nuevo producto"
             value={nuevoNombre}
-            onChange={e => setNuevoNombre(e.target.value)}
+            onChange={(e) => setNuevoNombre(e.target.value)}
           />
           <input
             type="number"
             placeholder="Precio"
             value={nuevoPrecio}
-            onChange={e => setNuevoPrecio(e.target.value)}
+            onChange={(e) => setNuevoPrecio(e.target.value)}
           />
           <input
             type="text"
             placeholder="Link de pago"
             value={nuevoLinkPago}
-            onChange={e => setNuevoLinkPago(e.target.value)}
+            onChange={(e) => setNuevoLinkPago(e.target.value)}
           />
           <button className="btn" onClick={handleAgregar}>Agregar</button>
         </div>
@@ -139,12 +151,12 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {productos.map(prod => (
+            {productos.map((prod) => (
               <tr key={prod.id}>
                 <td>{prod.nombre}</td>
                 <td>{prod.precio}</td>
                 <td>
-                  <button className="btn-qr" onClick={() => handleVerQR(prod.link_pago, prod.nombre)}>
+                  <button className="btn" onClick={() => handleVerQR(prod.link_pago, prod.nombre)}>
                     Ver QR
                   </button>
                 </td>
@@ -158,19 +170,6 @@ function App() {
           </tbody>
         </table>
       </div>
-
-      {/* Modal QR */}
-      {qrOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <QRCodeCanvas value={qrValue} size={220} id="qr-to-print" />
-            <div style={{display:"flex", gap:"10px", justifyContent:"center", margin:"14px 0 0 0"}}>
-              <button className="btn" onClick={handlePrintQR}>Imprimir</button>
-              <button className="btn-delete" onClick={() => setQROpen(false)}>Cerrar</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
