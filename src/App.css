@@ -1,48 +1,135 @@
-.modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+.app-bg {
+  background: #f4f9fd;
+  min-height: 100vh;
+  padding-top: 32px;
 }
-.modal-content {
+.centered-container {
+  max-width: 560px;
+  margin: 40px auto;
   background: #fff;
-  padding: 32px 28px;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px #0002;
+  border-radius: 18px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.10);
+  padding: 32px 22px 28px 22px;
   text-align: center;
-  min-width: 260px;
 }
-.btn {
-  background: #2673C3;
+.logo-img {
+  width: 56px;
+  margin-bottom: 6px;
+}
+.main-title {
+  color: #2461b1;
+  font-size: 2.1rem;
+  margin-bottom: 4px;
+}
+.subtitle {
+  font-size: 1.04rem;
+  color: #666;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+.inputs-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.inputs-row input {
+  padding: 7px 8px;
+  border-radius: 7px;
+  border: 1px solid #b7b7b7;
+  font-size: 16px;
+}
+.add-btn {
+  background: #2384e6;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  padding: 7px 16px;
+  padding: 8px 16px;
+  border-radius: 7px;
   cursor: pointer;
-  font-size: 1rem;
+  font-weight: 600;
 }
-.btn-qr {
-  background: #2c8ed6;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  padding: 7px 16px;
-  cursor: pointer;
-  font-size: 1rem;
+.add-btn:hover {
+  background: #1b5da6;
 }
-.btn-delete {
-  background: #e74c3c;
+table {
+  width: 100%;
+  border-radius: 7px;
+  overflow: hidden;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #f3f8fe;
+}
+th, td {
+  padding: 11px 8px;
+  border-bottom: 1px solid #e6e9ef;
+  text-align: center;
+}
+th {
+  background: #48a4ea;
   color: #fff;
+  font-weight: bold;
+}
+.qr-btn, .delete-btn {
+  padding: 6px 16px;
   border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  padding: 7px 16px;
+  border-radius: 7px;
+  font-size: 15px;
   cursor: pointer;
-  font-size: 1rem;
+}
+.qr-btn { background: #49b7ff; color: #fff; }
+.qr-btn:hover { background: #178bdc; }
+.delete-btn { background: #ff7979; color: #fff; }
+.delete-btn:hover { background: #d44d4d; }
+
+.modal-bg {
+  position: fixed; top:0; left:0; width:100vw; height:100vh;
+  background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center;
+  z-index: 40;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 38px 0 rgba(0,0,0,0.15);
+  padding: 28px 26px 22px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 350px;
+}
+.qr-print-container {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.qr-link {
+  font-size: 18px;
+  margin-top: 8px;
+  word-break: break-all;
+}
+.qr-product {
+  font-weight: bold;
+  margin-top: 4px;
+  font-size: 20px;
+}
+.qr-text {
+  font-size: 16px;
+  color: #222;
+  margin-top: 6px;
+}
+.imprimir, .cerrar {
+  margin: 8px 6px 0 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 7px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.imprimir { background: #2da5ff; color: #fff; }
+.cerrar { background: #ff5757; color: #fff; }
+.imprimir:hover { background: #2384e6; }
+.cerrar:hover { background: #e24242; }
+@media print {
+  body * { visibility: hidden !important; }
+  #qr-to-print, #qr-to-print * { visibility: visible !important; }
+  #qr-to-print { position: absolute; left: 0; top: 0; width: 100vw; }
+  .imprimir, .cerrar { display: none !important; }
 }
