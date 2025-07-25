@@ -34,7 +34,7 @@
         unit_price: precio
       };
 
-      const response = await fetch("/crear_link", {
+      const response = await fetch("https://web-production-d4c6.up.railway.app/crear_link", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
