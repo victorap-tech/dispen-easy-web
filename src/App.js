@@ -1,42 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dispen-Easy - Link de Pago</title>
+  <title>Dispen-Easy - Productos</title>
 </head>
 <body>
-  <h2>Generar Link de Pago</h2>
-  <button onclick="generarLink()">Generar</button>
-  <p id="link"></p>
+  <h2>Lista de Productos</h2>
+  <table border="1">
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Acción</th>
+    </tr>
+    <tr>
+      <td>Lavandina</td>
+      <td>100</td>
+      <td><button onclick="generarLink('Lavandina', 100)">Generar Link</button></td>
+    </tr>
+    <tr>
+      <td>Jabón</td>
+      <td>150</td>
+      <td><button onclick="generarLink('Jabón', 150)">Generar Link</button></td>
+    </tr>
+  </table>
+
+  <div id="resultado" style="margin-top: 20px;"></div>
 
   <script>
-    async function generarLink() {
+    async function generarLink(titulo, precio) {
       const body = {
-        title: "Producto Dispen-Easy",
+        title: titulo,
         quantity: 1,
-        unit_price: 100,
-        currency_id: "ARS"
+        unit_price: precio
       };
 
-      const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+      const response = await fetch("/crear_link", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer TU_ACCESS_TOKEN_PRODUCCION",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          items: [body],
-          back_urls: {
-            success: "https://www.success.com",
-            failure: "https://www.failure.com",
-            pending: "https://www.pending.com"
-          },
-          notification_url: "https://TU_DOMINIO/webhook"
-        })
+        body: JSON.stringify(body)
       });
 
       const data = await response.json();
-      document.getElementById("link").innerHTML = `<a href="${data.init_point}" target="_blank">Ir al Pago</a>`;
+      const resultadoDiv = document.getElementById("resultado");
+
+      if (data.init_point) {
+        resultadoDiv.innerHTML = `<a href="${data.init_point}" target="_blank">Pagar ${titulo}</a>`;
+      } else {
+        resultadoDiv.innerText = "Error al generar el link.";
+        console.error(data);
+      }
     }
   </script>
 </body>
