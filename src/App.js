@@ -1,54 +1,43 @@
-import React, { useEffect, useState } from "react";
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dispen-Easy - Link de Pago</title>
+</head>
+<body>
+  <h2>Generar Link de Pago</h2>
+  <button onclick="generarLink()">Generar</button>
+  <p id="link"></p>
 
-function App() {
-  const [productos, setProductos] = useState([]);
+  <script>
+    async function generarLink() {
+      const body = {
+        title: "Producto Dispen-Easy",
+        quantity: 1,
+        unit_price: 100,
+        currency_id: "ARS"
+      };
 
-  useEffect(() => {
-    fetch("https://web-production-d4c6.up.railway.app/productos")
-      .then((res) => res.json())
-      .then((data) => setProductos(data))
-      .catch(() => alert("No se pudo conectar al backend."));
-  }, []);
+      const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer TU_ACCESS_TOKEN_PRODUCCION",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          items: [body],
+          back_urls: {
+            success: "https://www.success.com",
+            failure: "https://www.failure.com",
+            pending: "https://www.pending.com"
+          },
+          notification_url: "https://TU_DOMINIO/webhook"
+        })
+      });
 
-  return (
-    <div>
-      <h1>Dispen-Easy Web</h1>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Precio ($)</th>
-            <th>Link de pago</th>
-            <th>Ver QR</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productos.map((p) => (
-            <tr key={p.id}>
-              <td>{p.nombre}</td>
-              <td>{p.precio}</td>
-              <td>
-                <a href={p.link_pago} target="_blank" rel="noopener noreferrer">
-                  Ir a pagar
-                </a>
-              </td>
-              <td>
-                <a
-                  href={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                    p.link_pago
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Ver QR
-                </a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export default App;
+      const data = await response.json();
+      document.getElementById("link").innerHTML = `<a href="${data.init_point}" target="_blank">Ir al Pago</a>`;
+    }
+  </script>
+</body>
+</html>
