@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const BACKEND_URL = "https://web-production-d4c6.up.railway.app/"; // Cambia si hace falta
+const BACKEND_URL = "https://web-production-d4c6.up.railway.app"; // Cambia si hace falta
 
 export default function App() {
   const [productos, setProductos] = useState([]);
