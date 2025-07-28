@@ -1,0 +1,18 @@
+<!-- logo-dispens-easy-alt.svg -->
+<svg width="200" height="230" viewBox="0 0 200 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dropGradient" x1="100" y1="0" x2="100" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3180e0"/>
+      <stop offset="1" stop-color="#123469"/>
+    </linearGradient>
+  </defs>
+  <path d="M100 10C100 10 30 90 30 150C30 197 71 220 100 220C129 220 170 197 170 150C170 90 100 10 100 10Z" fill="url(#dropGradient)"/>
+  <circle cx="100" cy="120" r="45" fill="white" opacity="0.25"/>
+  <circle cx="100" cy="145" r="10" fill="#3180e0"/>
+  <circle cx="100" cy="85" r="7" fill="#3180e0"/>
+  <circle cx="70" cy="135" r="6" fill="#3180e0"/>
+  <circle cx="130" cy="135" r="6" fill="#3180e0"/>
+  <line x1="100" y1="92" x2="100" y2="135" stroke="#3180e0" stroke-width="3"/>
+  <line x1="75" y1="135" x2="97" y2="145" stroke="#3180e0" stroke-width="3"/>
+  <line x1="125" y1="135" x2="103" y2="145" stroke="#3180e0" stroke-width="3"/>
+</svg>
