@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .App {
   text-align: center;
 }
@@ -36,3 +37,75 @@
     transform: rotate(360deg);
   }
 }
+=======
+body {
+  background: #f6f6fa;
+}
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 0 24px #aaa3;
+  padding: 40px 32px;
+  min-width: 450px;
+  max-width: 540px;
+}
+
+h1 {
+  color: #2964b0;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+form input, form button {
+  padding: 6px 8px;
+  border-radius: 7px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  background: #3484d6;
+  color: white;
+  border: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #4fa4e2;
+  color: white;
+}
+
+.qr-modal {
+  position: fixed;
+  z-index: 10;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: #0005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-box {
+  background: white;
+  padding: 24px 30px;
+  border-radius: 15px;
+  text-align: center;
+}
+>>>>>>> e38220e08d292d5f5ddb3b7c4b16f7c4914f69e6
