@@ -2,7 +2,11 @@ import React from "react";
 import AdminPanel from "./AdminPanel";
 
 function App() {
-  return <AdminPanel />;
+  return (
+    <div className="App">
+      <AdminPanel />
+    </div>
+  );
 }
 
 export default App;
