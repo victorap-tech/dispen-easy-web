@@ -2,34 +2,22 @@ import React, { useEffect, useState } from "react";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-function AdminPanel() {
-  const [productos, setProductos] = useState([]);
+const AdminPanel = () => {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
+  const [productos, setProductos] = useState([]);
 
-  // Obtener productos desde el backend
   const obtenerProductos = async () => {
     try {
       const res = await fetch(`${API_URL}/api/productos`);
       const data = await res.json();
       setProductos(data);
-    } catch (error) {
-      console.error("Error al obtener productos:", error);
+    } catch (err) {
+      console.error("Error al obtener productos:", err);
     }
   };
 
-  useEffect(() => {
-    obtenerProductos();
-  }, []);
-
-  // Agregar producto
   const handleAgregar = async () => {
-    const precioFloat = parseFloat(precio);
-    if (!nombre || isNaN(precioFloat)) {
-      alert("Ingrese un nombre y un precio válido");
-      return;
-    }
-
     try {
       const res = await fetch(`${API_URL}/api/productos`, {
         method: "POST",
@@ -38,92 +26,87 @@ function AdminPanel() {
         },
         body: JSON.stringify({
           nombre,
-          precio: precioFloat,
+          precio: parseFloat(precio),
           cantidad_ml: 500,
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok) {
         setNombre("");
         setPrecio("");
-        obtenerProductos(); // refresca la tabla
+        obtenerProductos(); // Refresca la tabla
       } else {
-        alert("Error al agregar producto");
+        const error = await res.text();
+        console.error("Error al agregar:", error);
       }
-    } catch (error) {
-      console.error("Error en handleAgregar:", error);
+    } catch (err) {
+      console.error("Error:", err);
     }
   };
 
-  // Eliminar producto
   const handleEliminar = async (id) => {
     try {
       const res = await fetch(`${API_URL}/api/productos/${id}`, {
         method: "DELETE",
       });
-
-      const data = await res.json();
-      if (data.success) {
-        obtenerProductos();
+      if (res.ok) {
+        obtenerProductos(); // Refresca la tabla
       } else {
-        alert("Error al eliminar producto");
+        const error = await res.text();
+        console.error("Error al eliminar:", error);
       }
-    } catch (error) {
-      console.error("Error al eliminar producto:", error);
+    } catch (err) {
+      console.error("Error:", err);
     }
   };
 
+  useEffect(() => {
+    obtenerProductos();
+  }, []);
+
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "1rem" }}>
       <h2>Panel de Administración</h2>
 
-      <div>
-        <h3>Agregar producto</h3>
-        <input
-          type="text"
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Precio"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-        />
-        <button onClick={handleAgregar}>Agregar</button>
-      </div>
+      <h4>Agregar producto</h4>
+      <input
+        placeholder="Nombre"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+      />
+      <input
+        placeholder="Precio"
+        type="number"
+        value={precio}
+        onChange={(e) => setPrecio(e.target.value)}
+      />
+      <button onClick={handleAgregar}>Agregar</button>
 
-      <div>
-        <h3>Lista de productos</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Precio</th>
-              <th>Eliminar</th>
+      <h4>Lista de productos</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {productos.map((prod) => (
+            <tr key={prod.id}>
+              <td>{prod.id}</td>
+              <td>{prod.nombre}</td>
+              <td>{prod.precio}</td>
+              <td>
+                <button onClick={() => handleEliminar(prod.id)}>Eliminar</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {productos.map((prod) => (
-              <tr key={prod.id}>
-                <td>{prod.id}</td>
-                <td>{prod.nombre}</td>
-                <td>{prod.precio}</td>
-                <td>
-                  <button onClick={() => handleEliminar(prod.id)}>
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
 
 export default AdminPanel;
