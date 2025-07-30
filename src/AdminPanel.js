@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 function AdminPanel() {
   const [productos, setProductos] = useState([]);
   const [nuevoProducto, setNuevoProducto] = useState({ nombre: "", precio: "" });
 
-  const API_URL = process.env.REACT_APP_API_URL;
-
-  const obtenerProductos = async () => {
+  const obtenerProductos = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/productos`);
       const data = await res.json();
-      setProductos(data.productos || []);
+      setProductos(data);
     } catch (error) {
       console.error("Error al obtener productos:", error);
     }
-  };
+  }, []);
 
   const agregarProducto = async () => {
-    if (!nuevoProducto.nombre || !nuevoProducto.precio) return;
-
     try {
       const res = await fetch(`${API_URL}/api/productos`, {
         method: "POST",
@@ -49,10 +47,9 @@ function AdminPanel() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     obtenerProductos();
-  }, []);
+  }, [obtenerProductos]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -66,7 +63,7 @@ function AdminPanel() {
         onChange={(e) => setNuevoProducto({ ...nuevoProducto, nombre: e.target.value })}
       />
       <input
-        type="number"
+        type="text"
         placeholder="Precio"
         value={nuevoProducto.precio}
         onChange={(e) => setNuevoProducto({ ...nuevoProducto, precio: e.target.value })}
@@ -74,7 +71,7 @@ function AdminPanel() {
       <button onClick={agregarProducto}>Agregar</button>
 
       <h3>Lista de productos</h3>
-      <table border="1" cellPadding="5">
+      <table>
         <thead>
           <tr>
             <th>ID</th>
