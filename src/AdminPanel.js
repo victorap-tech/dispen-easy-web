@@ -1,69 +1,71 @@
-import React, { useEffect, useState } from "react";
-
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function AdminPanel() {
   const [productos, setProductos] = useState([]);
-  const [form, setForm] = useState({ nombre: "", precio: "", cantidad_ml: "" });
-  const [qrGenerado, setQrGenerado] = useState(null);
+  const [nombre, setNombre] = useState('');
+  const [precio, setPrecio] = useState('');
+  const [cantidad_ml, setCantidadMl] = useState('');
+
+  const API = 'https://dispen-easy-backend-production.up.railway.app';
 
   useEffect(() => {
-    fetch(`${API}/api/productos`)
-      .then((res) => res.json())
-      .then(setProductos);
+    fetchProductos();
   }, []);
 
-  const agregar = async () => {
-    await fetch(`${API}/api/productos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setForm({ nombre: "", precio: "", cantidad_ml: "" });
-    const res = await fetch(`${API}/api/productos`);
-    const data = await res.json();
-    setProductos(data);
+  const fetchProductos = async () => {
+    const res = await axios.get(`${API}/api/productos`);
+    setProductos(res.data);
   };
 
-  const eliminar = async (id) => {
-    await fetch(`${API}/api/productos/${id}`, { method: "DELETE" });
-    const res = await fetch(`${API}/api/productos`);
-    const data = await res.json();
-    setProductos(data);
+  const agregarProducto = async () => {
+    if (!nombre || !precio || !cantidad_ml) return;
+    await axios.post(`${API}/api/productos`, { nombre, precio, cantidad_ml });
+    setNombre('');
+    setPrecio('');
+    setCantidadMl('');
+    fetchProductos();
+  };
+
+  const eliminarProducto = async (id) => {
+    await axios.delete(`${API}/api/productos/${id}`);
+    fetchProductos();
   };
 
   const generarQR = async (id) => {
-    const res = await fetch(`${API}/api/generar_qr/${id}`, {
-      method: "POST",
-    });
-    const data = await res.json();
-    setQrGenerado(data.qr_data);
+    try {
+      const res = await axios.post(`${API}/api/generar_qr/${id}`);
+      const url = res.data.url;
+      window.open(url, '_blank');
+    } catch (error) {
+      alert('Error al generar QR');
+    }
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Panel Dispen-Easy</h1>
-
+    <div style={{ padding: 20 }}>
+      <h2>Panel Dispen-Easy</h2>
       <input
+        type="text"
         placeholder="Nombre"
-        value={form.nombre}
-        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
       />
       <input
         type="number"
         placeholder="Precio"
-        value={form.precio}
-        onChange={(e) => setForm({ ...form, precio: e.target.value })}
+        value={precio}
+        onChange={(e) => setPrecio(e.target.value)}
       />
       <input
         type="number"
         placeholder="Cantidad ML"
-        value={form.cantidad_ml}
-        onChange={(e) => setForm({ ...form, cantidad_ml: e.target.value })}
+        value={cantidad_ml}
+        onChange={(e) => setCantidadMl(e.target.value)}
       />
-      <button onClick={agregar}>Agregar</button>
+      <button onClick={agregarProducto}>Agregar</button>
 
-      <table border="1" style={{ marginTop: "1rem" }}>
+      <table border="1" style={{ marginTop: 20 }}>
         <thead>
           <tr>
             <th>Nombre</th>
@@ -76,26 +78,16 @@ function AdminPanel() {
           {productos.map((p) => (
             <tr key={p.id}>
               <td>{p.nombre}</td>
-              <td>{p.precio}</td>
-              <td>{p.cantidad_ml}</td>
+              <td>${p.precio}</td>
+              <td>{p.cantidad_ml}ml</td>
               <td>
-                <button onClick={() => eliminar(p.id)}>Eliminar</button>
-                <button onClick={() => generarQR(p.id)}>QR Pago</button>
+                <button onClick={() => generarQR(p.id)}>QR</button>
+                <button onClick={() => eliminarProducto(p.id)}>Eliminar</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      {qrGenerado && (
-        <div style={{ marginTop: "1rem" }}>
-          <strong>Enlace QR:</strong>
-          <br />
-          <a href={qrGenerado} target="_blank" rel="noreferrer">
-            {qrGenerado}
-          </a>
-        </div>
-      )}
     </div>
   );
 }
