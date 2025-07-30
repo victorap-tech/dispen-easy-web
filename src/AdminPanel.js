@@ -51,7 +51,7 @@ function AdminPanel() {
 
   useEffect(() => {
     obtenerProductos();
-  }, []);
+  }, [obtenerProductos]);
 
   return (
     <div style={{ padding: "20px" }}>
