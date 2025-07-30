@@ -1,112 +1,103 @@
 import React, { useEffect, useState } from "react";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const AdminPanel = () => {
-  const [nombre, setNombre] = useState("");
-  const [precio, setPrecio] = useState("");
+function AdminPanel() {
   const [productos, setProductos] = useState([]);
-
-  const obtenerProductos = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/productos`);
-      const data = await res.json();
-      setProductos(data);
-    } catch (err) {
-      console.error("Error al obtener productos:", err);
-    }
-  };
-
-  const handleAgregar = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/productos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombre,
-          precio: parseFloat(precio),
-          cantidad_ml: 500,
-        }),
-      });
-
-      if (res.ok) {
-        setNombre("");
-        setPrecio("");
-        obtenerProductos(); // Refresca la tabla
-      } else {
-        const error = await res.text();
-        console.error("Error al agregar:", error);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
-
-  const handleEliminar = async (id) => {
-    try {
-      const res = await fetch(`${API_URL}/api/productos/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        obtenerProductos(); // Refresca la tabla
-      } else {
-        const error = await res.text();
-        console.error("Error al eliminar:", error);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  };
+  const [form, setForm] = useState({ nombre: "", precio: "", cantidad_ml: "" });
+  const [qrGenerado, setQrGenerado] = useState(null);
 
   useEffect(() => {
-    obtenerProductos();
+    fetch(`${API}/api/productos`)
+      .then((res) => res.json())
+      .then(setProductos);
   }, []);
 
-  return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Panel de Administración</h2>
+  const agregar = async () => {
+    await fetch(`${API}/api/productos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    setForm({ nombre: "", precio: "", cantidad_ml: "" });
+    const res = await fetch(`${API}/api/productos`);
+    const data = await res.json();
+    setProductos(data);
+  };
 
-      <h4>Agregar producto</h4>
+  const eliminar = async (id) => {
+    await fetch(`${API}/api/productos/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API}/api/productos`);
+    const data = await res.json();
+    setProductos(data);
+  };
+
+  const generarQR = async (id) => {
+    const res = await fetch(`${API}/api/generar_qr/${id}`, {
+      method: "POST",
+    });
+    const data = await res.json();
+    setQrGenerado(data.qr_data);
+  };
+
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1>Panel Dispen-Easy</h1>
+
       <input
         placeholder="Nombre"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
+        value={form.nombre}
+        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
       />
       <input
-        placeholder="Precio"
         type="number"
-        value={precio}
-        onChange={(e) => setPrecio(e.target.value)}
+        placeholder="Precio"
+        value={form.precio}
+        onChange={(e) => setForm({ ...form, precio: e.target.value })}
       />
-      <button onClick={handleAgregar}>Agregar</button>
+      <input
+        type="number"
+        placeholder="Cantidad ML"
+        value={form.cantidad_ml}
+        onChange={(e) => setForm({ ...form, cantidad_ml: e.target.value })}
+      />
+      <button onClick={agregar}>Agregar</button>
 
-      <h4>Lista de productos</h4>
-      <table>
+      <table border="1" style={{ marginTop: "1rem" }}>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nombre</th>
             <th>Precio</th>
-            <th>Eliminar</th>
+            <th>ML</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {productos.map((prod) => (
-            <tr key={prod.id}>
-              <td>{prod.id}</td>
-              <td>{prod.nombre}</td>
-              <td>{prod.precio}</td>
+          {productos.map((p) => (
+            <tr key={p.id}>
+              <td>{p.nombre}</td>
+              <td>{p.precio}</td>
+              <td>{p.cantidad_ml}</td>
               <td>
-                <button onClick={() => handleEliminar(prod.id)}>Eliminar</button>
+                <button onClick={() => eliminar(p.id)}>Eliminar</button>
+                <button onClick={() => generarQR(p.id)}>QR Pago</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {qrGenerado && (
+        <div style={{ marginTop: "1rem" }}>
+          <strong>Enlace QR:</strong>
+          <br />
+          <a href={qrGenerado} target="_blank" rel="noreferrer">
+            {qrGenerado}
+          </a>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default AdminPanel;
