@@ -7,7 +7,7 @@ function AdminPanel() {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
 
-  // Obtener productos al cargar
+  // Obtener productos desde el backend
   const obtenerProductos = async () => {
     try {
       const res = await fetch(`${API_URL}/api/productos`);
@@ -24,6 +24,12 @@ function AdminPanel() {
 
   // Agregar producto
   const handleAgregar = async () => {
+    const precioFloat = parseFloat(precio);
+    if (!nombre || isNaN(precioFloat)) {
+      alert("Ingrese un nombre y un precio válido");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/productos`, {
         method: "POST",
@@ -32,21 +38,21 @@ function AdminPanel() {
         },
         body: JSON.stringify({
           nombre,
-          precio: parseFloat(precio),
+          precio: precioFloat,
           cantidad_ml: 500,
         }),
       });
 
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.success) {
         setNombre("");
         setPrecio("");
-        obtenerProductos(); // 🔄 Refrescar la tabla
+        obtenerProductos(); // refresca la tabla
       } else {
-        console.error("Error al agregar:", data);
+        alert("Error al agregar producto");
       }
     } catch (error) {
-      console.error("Error al agregar producto:", error);
+      console.error("Error en handleAgregar:", error);
     }
   };
 
@@ -58,10 +64,10 @@ function AdminPanel() {
       });
 
       const data = await res.json();
-      if (res.ok) {
-        obtenerProductos(); // 🔄 Refrescar la tabla
+      if (data.success) {
+        obtenerProductos();
       } else {
-        console.error("Error al eliminar:", data);
+        alert("Error al eliminar producto");
       }
     } catch (error) {
       console.error("Error al eliminar producto:", error);
@@ -72,55 +78,50 @@ function AdminPanel() {
     <div style={{ padding: "20px" }}>
       <h2>Panel de Administración</h2>
 
-      <div style={{ marginBottom: "20px" }}>
+      <div>
+        <h3>Agregar producto</h3>
         <input
           type="text"
-          placeholder="Nombre del producto"
+          placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          style={{ marginRight: "10px" }}
         />
         <input
           type="number"
           placeholder="Precio"
           value={precio}
           onChange={(e) => setPrecio(e.target.value)}
-          style={{ marginRight: "10px" }}
         />
-        <button onClick={handleAgregar}>Agregar Producto</button>
+        <button onClick={handleAgregar}>Agregar</button>
       </div>
 
-      <table border="1" cellPadding="10" cellSpacing="0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Precio ($)</th>
-            <th>Cantidad (ml)</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productos.map((producto) => (
-            <tr key={producto.id}>
-              <td>{producto.id}</td>
-              <td>{producto.nombre}</td>
-              <td>{producto.precio}</td>
-              <td>{producto.cantidad_ml}</td>
-              <td>
-                <button onClick={() => handleEliminar(producto.id)}>
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-          {productos.length === 0 && (
+      <div>
+        <h3>Lista de productos</h3>
+        <table>
+          <thead>
             <tr>
-              <td colSpan="5">No hay productos disponibles</td>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Eliminar</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {productos.map((prod) => (
+              <tr key={prod.id}>
+                <td>{prod.id}</td>
+                <td>{prod.nombre}</td>
+                <td>{prod.precio}</td>
+                <td>
+                  <button onClick={() => handleEliminar(prod.id)}>
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
