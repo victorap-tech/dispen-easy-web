@@ -49,9 +49,10 @@ function AdminPanel() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     obtenerProductos();
-  }, [obtenerProductos]);
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>
