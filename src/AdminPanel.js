@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const API = process.env.REACT_APP_API_URL;
 
 function AdminPanel() {
   const [productos, setProductos] = useState([]);
-  const [nombre, setNombre] = useState('');
-  const [precio, setPrecio] = useState('');
-  const [cantidad, setCantidad] = useState('');
-
-  const API = 'https://dispen-easy-backend-production.up.railway.app';
+  const [nombre, setNombre] = useState("");
+  const [precio, setPrecio] = useState("");
+  const [cantidad, setCantidad] = useState("");
 
   useEffect(() => {
     fetchProductos();
@@ -18,16 +18,20 @@ function AdminPanel() {
     setProductos(res.data);
   };
 
-  const agregarProducto = async () => {
+  const agregar = async () => {
     if (!nombre || !precio || !cantidad) return;
-    await axios.post(`${API}/api/productos`, { nombre, precio, cantidad });
-    setNombre('');
-    setPrecio('');
-    setCantidad('');
+    await axios.post(`${API}/api/productos`, {
+      nombre,
+      precio: parseFloat(precio),
+      cantidad: parseInt(cantidad),
+    });
+    setNombre("");
+    setPrecio("");
+    setCantidad("");
     fetchProductos();
   };
 
-  const eliminarProducto = async (id) => {
+  const eliminar = async (id) => {
     await axios.delete(`${API}/api/productos/${id}`);
     fetchProductos();
   };
@@ -35,42 +39,44 @@ function AdminPanel() {
   const generarQR = async (id) => {
     try {
       const res = await axios.post(`${API}/api/generar_qr/${id}`);
-      const url = res.data.url;
-      window.open(url, '_blank');
-    } catch (error) {
-      alert('Error al generar QR');
+      window.open(res.data.url, "_blank");
+    } catch {
+      alert("Error al obtener QR");
     }
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Panel Dispen-Easy</h2>
-      <input
-        type="text"
-        placeholder="Nombre"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Precio"
-        value={precio}
-        onChange={(e) => setPrecio(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Cantidad"
-        value={cantidad}
-        onChange={(e) => setCantidadMl(e.target.value)}
-      />
-      <button onClick={agregarProducto}>Agregar</button>
+      <h1>Panel Administration Dispen‑Easy</h1>
 
-      <table border="1" style={{ marginTop: 20 }}>
+      <div>
+        <input
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Precio"
+          value={precio}
+          onChange={(e) => setPrecio(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Cantidad"
+          value={cantidad}
+          onChange={(e) => setCantidad(e.target.value)}
+        />
+        <button onClick={agregar}>Agregar</button>
+      </div>
+
+      <h2>Productos</h2>
+      <table border="1" style={{ width: "100%", marginTop: 10 }}>
         <thead>
           <tr>
             <th>Nombre</th>
             <th>Precio</th>
-            <th>ML</th>
+            <th>Cantidad</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -79,10 +85,10 @@ function AdminPanel() {
             <tr key={p.id}>
               <td>{p.nombre}</td>
               <td>${p.precio}</td>
-              <td>{p.cantidad}ml</td>
+              <td>{p.cantidad}</td>
               <td>
-                <button onClick={() => generarQR(p.id)}>QR</button>
-                <button onClick={() => eliminarProducto(p.id)}>Eliminar</button>
+                <button onClick={() => generarQR(p.id)}>QR Pago</button>{" "}
+                <button onClick={() => eliminar(p.id)}>Eliminar</button>
               </td>
             </tr>
           ))}
