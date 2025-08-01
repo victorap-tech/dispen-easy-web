@@ -5,7 +5,7 @@ function AdminPanel() {
   const [productos, setProductos] = useState([]);
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
-  const [cantidad_ml, setCantidadMl] = useState('');
+  const [cantidad, setCantidad] = useState('');
 
   const API = 'https://dispen-easy-backend-production.up.railway.app';
 
@@ -19,11 +19,11 @@ function AdminPanel() {
   };
 
   const agregarProducto = async () => {
-    if (!nombre || !precio || !cantidad_ml) return;
-    await axios.post(`${API}/api/productos`, { nombre, precio, cantidad_ml });
+    if (!nombre || !precio || !cantidad) return;
+    await axios.post(`${API}/api/productos`, { nombre, precio, cantidad });
     setNombre('');
     setPrecio('');
-    setCantidadMl('');
+    setCantidad('');
     fetchProductos();
   };
 
@@ -59,8 +59,8 @@ function AdminPanel() {
       />
       <input
         type="number"
-        placeholder="Cantidad ML"
-        value={cantidad_ml}
+        placeholder="Cantidad"
+        value={cantidad}
         onChange={(e) => setCantidadMl(e.target.value)}
       />
       <button onClick={agregarProducto}>Agregar</button>
@@ -79,7 +79,7 @@ function AdminPanel() {
             <tr key={p.id}>
               <td>{p.nombre}</td>
               <td>${p.precio}</td>
-              <td>{p.cantidad_ml}ml</td>
+              <td>{p.cantidad}ml</td>
               <td>
                 <button onClick={() => generarQR(p.id)}>QR</button>
                 <button onClick={() => eliminarProducto(p.id)}>Eliminar</button>
