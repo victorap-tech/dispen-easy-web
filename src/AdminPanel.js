@@ -14,26 +14,38 @@ function AdminPanel() {
   }, []);
 
   const fetchProductos = async () => {
-    const res = await axios.get(`${API}/api/productos`);
-    setProductos(res.data);
+    try {
+      const res = await axios.get(`${API}/api/productos`);
+      setProductos([...res.data]); // fuerza nuevo array
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+    }
   };
 
   const agregar = async () => {
     if (!nombre || !precio || !cantidad) return;
-    await axios.post(`${API}/api/productos`, {
-      nombre,
-      precio: parseFloat(precio),
-      cantidad: parseInt(cantidad),
-    });
-    setNombre("");
-    setPrecio("");
-    setCantidad("");
-    fetchProductos();
+    try {
+      await axios.post(`${API}/api/productos`, {
+        nombre,
+        precio: parseFloat(precio),
+        cantidad: parseInt(cantidad),
+      });
+      setNombre("");
+      setPrecio("");
+      setCantidad("");
+      fetchProductos();
+    } catch (error) {
+      console.error("Error al agregar:", error);
+    }
   };
 
   const eliminar = async (id) => {
-    await axios.delete(`${API}/api/productos/${id}`);
-    fetchProductos();
+    try {
+      await axios.delete(`${API}/api/productos/${id}`);
+      fetchProductos(); // recarga productos
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
   };
 
   const generarQR = async (id) => {
@@ -45,40 +57,35 @@ function AdminPanel() {
     }
   };
 
- return (
-  <div>
-    <h1>Panel Administración Dispen-Easy</h1>
-    <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" />
-    <input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Precio" />
-    <input value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder="Cantidad" />
-    <button onClick={agregar}>Agregar</button>
+  return (
+    <div>
+      <h2>Panel Administration Dispen-Easy</h2>
+      <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" />
+      <input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Precio" />
+      <input value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder="Cantidad" />
+      <button onClick={agregar}>Agregar</button>
 
-    <h3>Productos</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Cantidad</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {productos.map((prod) => (
-          <tr key={prod.id}>
-            <td>{prod.nombre}</td>
-            <td>${prod.precio}</td>
-            <td>{prod.cantidad}</td>
-            <td>
-              <button onClick={() => generarQR(prod.id)}>QR Pago</button>
-              <button onClick={() => eliminar(prod.id)}>Eliminar</button>
-            </td>
+      <h3>Productos</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Precio</th><th>Cantidad</th><th></th><th></th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+        </thead>
+        <tbody>
+          {productos.map((p) => (
+            <tr key={p.id}>
+              <td>{p.nombre}</td>
+              <td>${p.precio}</td>
+              <td>{p.cantidad}</td>
+              <td><button onClick={() => generarQR(p.id)}>QR Pago</button></td>
+              <td><button onClick={() => eliminar(p.id)}>Eliminar</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default AdminPanel;
