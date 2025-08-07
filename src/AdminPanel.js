@@ -40,13 +40,14 @@ function AdminPanel() {
   };
 
   const eliminar = async (id) => {
-    try {
-      await axios.delete(`${API}/api/productos/${id}`);
-      fetchProductos(); // recarga productos
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-    }
-  };
+  try {
+    await axios.delete(`${API}/api/productos/${id}`);
+    // Quitamos el producto eliminado directamente del estado
+    setProductos((prev) => prev.filter((p) => p.id !== id));
+  } catch (error) {
+    console.error("Error al eliminar:", error);
+  }
+};
 
   const generarQR = async (id) => {
     try {
