@@ -45,57 +45,40 @@ function AdminPanel() {
     }
   };
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Panel Administration Dispen‑Easy</h1>
+ return (
+  <div>
+    <h1>Panel Administración Dispen-Easy</h1>
+    <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" />
+    <input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Precio" />
+    <input value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder="Cantidad" />
+    <button onClick={agregar}>Agregar</button>
 
-      <div>
-        <input
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Precio"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Cantidad"
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-        />
-        <button onClick={agregar}>Agregar</button>
-      </div>
-
-      <h2>Productos</h2>
-      <table border="1" style={{ width: "100%", marginTop: 10 }}>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Acciones</th>
+    <h3>Productos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {productos.map((prod) => (
+          <tr key={prod.id}>
+            <td>{prod.nombre}</td>
+            <td>${prod.precio}</td>
+            <td>{prod.cantidad}</td>
+            <td>
+              <button onClick={() => generarQR(prod.id)}>QR Pago</button>
+              <button onClick={() => eliminar(prod.id)}>Eliminar</button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {productos.map((p) => (
-            <tr key={p.id}>
-              <td>{p.nombre}</td>
-              <td>${p.precio}</td>
-              <td>{p.cantidad}</td>
-              <td>
-                <button onClick={() => generarQR(p.id)}>QR Pago</button>{" "}
-                <button onClick={() => eliminar(p.id)}>Eliminar</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 }
 
 export default AdminPanel;
