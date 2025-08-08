@@ -24,7 +24,7 @@ function AdminPanel() {
   const agregar = async () => {
     if (!nombre || !precio || !cantidad) return;
 
-    await axios.post(`${API}/api/productos`, {
+    await axios.post(`${API}/productos`, {
       nombre,
       precio: parseFloat(precio),
       cantidad: parseInt(cantidad),
