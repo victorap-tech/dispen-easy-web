@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL;
+
 
 function AdminPanel() {
+  const API = process.env.REACT_APP_API_URL;
+
   const [productos, setProductos] = useState([]);
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
