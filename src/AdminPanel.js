@@ -8,7 +8,7 @@ function AdminPanel() {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [cantidad, setCantidad] = useState("");
-  const [qrUrl, setQrUrl] = useState(""); // NUEVO
+  const [qrBase64, setQrBase64] = useState("");
 
   useEffect(() => {
     fetchProductos();
@@ -21,11 +21,13 @@ function AdminPanel() {
 
   const agregar = async () => {
     if (!nombre || !precio || !cantidad) return;
+
     await axios.post(`${API}/api/productos`, {
       nombre,
       precio: parseFloat(precio),
       cantidad: parseInt(cantidad),
     });
+
     setNombre("");
     setPrecio("");
     setCantidad("");
@@ -40,7 +42,7 @@ function AdminPanel() {
   const generarQR = async (id) => {
     try {
       const res = await axios.post(`${API}/api/generar_qr/${id}`);
-      setQrUrl(res.data.url); // Mostramos imagen del QR
+      setQrBase64(res.data.qr_base64);
     } catch {
       alert("Error al obtener QR");
     }
@@ -48,28 +50,27 @@ function AdminPanel() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Panel Administration Dispen-Easy</h1>
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          placeholder="Nombre"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-        />
-        <input
-          placeholder="Precio"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-        />
-        <input
-          placeholder="Cantidad (en litros)"
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-        />
-        <button onClick={agregar}>Agregar</button>
-      </div>
+      <h1>Panel Administración Dispen-Easy</h1>
+
+      <input
+        placeholder="Nombre"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+      />
+      <input
+        placeholder="Precio"
+        value={precio}
+        onChange={(e) => setPrecio(e.target.value)}
+      />
+      <input
+        placeholder="Cantidad (litros)"
+        value={cantidad}
+        onChange={(e) => setCantidad(e.target.value)}
+      />
+      <button onClick={agregar}>Agregar</button>
 
       <h2>Productos</h2>
-      <table border="1" cellPadding="5">
+      <table border="1" cellPadding="10">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -96,10 +97,14 @@ function AdminPanel() {
         </tbody>
       </table>
 
-      {qrUrl && (
+      {qrBase64 && (
         <div style={{ marginTop: "20px" }}>
           <h3>Escaneá para pagar</h3>
-          <img src={qrUrl} alt="QR de pago" style={{ width: "200px" }} />
+          <img
+            src={`data:image/png;base64,${qrBase64}`}
+            alt="QR de pago"
+            style={{ width: "200px" }}
+          />
         </div>
       )}
     </div>
