@@ -87,8 +87,11 @@ function AdminPanel() {
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
+            {qrUrl && (
+  <div style={{ marginTop: '20px' }}>
+    <h3>Escaneá para pagar</h3>
+    <img src={qrUrl} alt="QR de pago" style={{ width: "200px" }} />
+  </div>
+)}
 
 export default AdminPanel;
