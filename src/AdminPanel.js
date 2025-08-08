@@ -9,6 +9,7 @@ function AdminPanel() {
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [cantidad, setCantidad] = useState("");
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
     fetchProductos();
