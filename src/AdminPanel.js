@@ -42,7 +42,7 @@ function AdminPanel() {
   const generarQR = async (id) => {
     try {
       const res = await axios.post(`${API}/api/generar_qr/${id}`);
-      setQrBase64(res.data.qr_base64);
+      setQrBase64(res.data.qr);
     } catch {
       alert("Error al obtener QR");
     }
