@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { QRCode } from "qrcode.react";
 
 const API = process.env.REACT_APP_API_URL;
 
