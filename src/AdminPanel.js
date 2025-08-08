@@ -17,7 +17,7 @@ function AdminPanel() {
   }, []);
 
   const fetchProductos = async () => {
-    const res = await axios.get(`${API}/api/productos`);
+    const res = await axios.get(`${API}/productos`);
     setProductos(res.data);
   };
 
